@@ -67,14 +67,14 @@ function fetchIssues(){
         let asignee = issues[i].asignee
         let status = issues[i].status
 
-        issueList.innerHTML +=  '<div class="well">'+
+        issueList.innerHTML +=  '<div class="border border-secondary p-2 rounded-sm">'+
                                     '<h6>Issue ID: '+id+'</h6>'+
                                     '<p><span class="label label-info">'+status+'</span>'+'</p>'+
                                     '<h3>'+desc+'</h3>'+
                                     '<p><span class="glyphicon glyphicon-time"></span>'+severity+'</p>'+
                                     '<p><span class="glyphicon glyphicon-user"></span>'+asignee+'</p>'+
-                                    '<a href="#" class="btn btn-warning" onclick="setStatusClosed(\''+id+'\')">Close</a>'+
-                                    '<a href="#" class="btn btn-danger" onclick="deleteIssue(\''+id+'\')">Delete</a>'+
+                                    '<a href="#" class="btn btn-sm m-1 btn-warning" onclick="setStatusClosed(\''+id+'\')">Close</a>'+
+                                    '<a href="#" class="btn btn-sm m-1 btn-danger" onclick="deleteIssue(\''+id+'\')">Delete</a>'+
                                 '</div>'
   }
 }
