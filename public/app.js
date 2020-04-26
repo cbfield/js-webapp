@@ -1,80 +1,107 @@
-document.getElementById('issueInputForm').addEventListener('submit', saveIssue)
+class Book {
+    constructor(title, author, isbn) {
+        this.title = title
+        this.author = author
+        this.isbn = isbn
+    }
+}
 
-function saveIssue(e){
-    let desc = document.getElementById('issueDescInput').value
-    let severity = document.getElementById('severityInput').value
-    let asignee = document.getElementById('asigneeInput').value
-    let id = chance.guid()
-    let status = 'Open'
+class Store {
+    static getBooks() {
+        let books
+        if (localStorage.getItem('books') === null || localStorage.getItem('books') === '') {
+            books = []
+        } else {
+            books = JSON.parse(localStorage.getItem('books'))
+        }
+        return books
+    }
+    static addBook(book) {
+        const books = Store.getBooks()
+        books.push(book)
+        localStorage.setItem('books',JSON.stringify(books))
+    }
+    static removeBook(isbn) {
+        const books = Store.getBooks()
+        books.forEach((book, index) => {
+            if (book.isbn === isbn) {
+                books.splice(index,1)
+                localStorage.setItem('books',JSON.stringify(books))
+            }
+        })
+    }
+}
 
-    let issue = {
-        id: id,
-        description: desc,
-        severity: severity,
-        asignee: asignee,
-        status: status
+class UI {
+    static displayBooks() {
+        const StoredBooks = Store.getBooks()
+        const books = StoredBooks
+        books.forEach((book) => UI.addBook(book))
     }
 
-    if (localStorage.getItem('issues') == null){
-        let issues = []
-        issues.push(issue)
-        localStorage.setItem('issues',JSON.stringify(issues))
-    }else{
-        let issues = JSON.parse(localStorage.getItem('issues'))
-        issues.push(issue)
-        localStorage.setItem('issues',JSON.stringify(issues))
+    static addBook(book) {
+        const list = document.getElementById('book-list')
+        const row = document.createElement('tr')
+        row.innerHTML = `
+            <td>${book.title}</td>
+            <td>${book.author}</td>
+            <td>${book.isbn}</td>
+            <td>
+                <a href="#" class="btn btn-danger btn-sm delete">X</a>
+            </td>
+        `
+        list.appendChild(row)
+        UI.formAlert('Book Added','success')
     }
 
-    document.getElementById('issueInputForm').reset()
-    fetchIssues()
+    static deleteBook(target) {
+        if (target.classList.contains('delete')) {
+            target.parentElement.parentElement.remove()
+            UI.formAlert('Book Removed','success')
+        }
+    }
+
+    static formAlert(msg, className) {
+        let alerts = document.querySelector('.alert')
+        if (alerts !== null) {
+            alerts.remove()
+        }
+
+        const div = document.createElement('div')
+        div.className = `alert alert-${className}`
+        div.appendChild(document.createTextNode(msg))
+        const container = document.querySelector('.container')
+        const form = document.getElementById('book-form')
+        container.insertBefore(div,form)
+
+        setTimeout(() => {
+            alerts = document.querySelector('.alert')
+            if (alerts !== null) {
+                alerts.remove()
+            }
+        }, 3000)
+    }
+}
+
+document.addEventListener('DOMContentLoaded', UI.displayBooks)
+
+document.getElementById('book-form').addEventListener('submit', (e)=> {
     e.preventDefault()
-}
+    const title = document.getElementById('title').value
+    const author = document.getElementById('author').value
+    const isbn = document.getElementById('isbn').value
 
-function setStatusClosed(id){
-    let issues = JSON.parse(localStorage.getItem('issues'))
-    for (var i=0; i<issues.length; i++){
-        if (issues[i].id == id){
-            issues[i].status = 'Closed'
-        }
+    if (title === '' || author === '' || isbn === '') {
+        UI.formAlert('Please fill all fields','danger')
+    } else {
+        const book = new Book(title, author, isbn)
+        Store.addBook(book)
+        UI.addBook(book)
+        e.target.reset()
     }
-    localStorage.setItem('issues',JSON.stringify(issues))
-    fetchIssues()
-}
+})
 
-function deleteIssue(id){
-    let issues = JSON.parse(localStorage.getItem('issues'))
-    for (var i=0; i<issues.length; i++){
-        if (issues[i].id == id){
-            issues.splice(i,1)
-        }
-    }
-    localStorage.setItem('issues',JSON.stringify(issues))
-    fetchIssues()
-}
-
-function fetchIssues(){
-    if (localStorage.getItem('issues') == null){
-        localStorage.setItem('issues',JSON.stringify([]))
-    }
-    let issues = JSON.parse(localStorage.getItem('issues'))
-    let issueList = document.getElementById('issueList')
-
-    issueList.innerHTML = ''
-    for (var i = 0; i < issues.length; i++){
-        let id = issues[i].id
-        let desc = issues[i].description
-        let severity = issues[i].severity
-        let asignee = issues[i].asignee
-        let status = issues[i].status
-
-        issueList.innerHTML +=  '<div class="border border-secondary p-2 rounded-sm">'+
-                                    '<h6>Issue ID: '+id+'</h6>'+
-                                    '<p><span class="label label-info">'+status+'</span>'+'</p>'+
-                                    '<h3>'+desc+'</h3>'+
-                                    '<p><span class="glyphicon glyphicon-time"></span>'+severity+'</p>'+
-                                    '<p><span class="glyphicon glyphicon-user"></span>'+asignee+'</p>'+
-                                    '<a href="#" class="btn btn-sm m-1 btn-warning" onclick="setStatusClosed(\''+id+'\')">Close</a>'+
-                                    '<a href="#" class="btn btn-sm m-1 btn-danger" onclick="deleteIssue(\''+id+'\')">Delete</a>'+
-                                '</div>'
-  }
-}
+document.getElementById('book-list').addEventListener('click', (e) => {
+    UI.deleteBook(e.target)
+    Store.removeBook(e.target.parentElement.previousElementSibling.textContent)
+})
