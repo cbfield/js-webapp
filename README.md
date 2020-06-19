@@ -1,2 +1,3 @@
 # js-webapp
-Practicing some JS
+
+Practicing some JS, workflow/ gh-pages deployment
