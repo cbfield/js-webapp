@@ -9,7 +9,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
     - name: Compile to 'dist/'
-      run: cp -r src/ dist/
+      run: cp -r src dist
 
     - name: Checkout Repo
       uses: actions/checkout@master
