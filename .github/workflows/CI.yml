@@ -8,14 +8,12 @@ jobs:
   build:
     runs-on: ubuntu-latest
     steps:
-    - name: Compile to 'dist/'
-      run: |
-        pwd
-        ls
-        #cp -r src dist
-
     - name: Checkout Repo
       uses: actions/checkout@master
+      
+    - name: Compile to 'dist/'
+      run: |
+        cp -r src dist
 
     - name: Deploy to S3
       uses: jakejarvis/s3-sync-action@master
